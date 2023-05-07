@@ -1,4 +1,6 @@
-export const create = <T = unknown>(rows: number, columns: number, slotHandler: (r: number, c: number) => T): T[] => {
+export type SlotHandler<T = unknown> = (r: number, c: number) => T
+
+export const create = <T = unknown>(rows: number, columns: number, slotHandler: SlotHandler<T>): T[] => {
     let mat: T[] = []
     
     for (let r = 0; r < rows; r++) {
