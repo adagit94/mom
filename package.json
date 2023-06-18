@@ -1,6 +1,6 @@
 {
     "version": "1.0.0",
-    "name": "@adam94/curve",
+    "name": "@adam94/mom",
     "description": "Matrix operations library.",
     "keywords": [
         "matrix",
