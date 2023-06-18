@@ -1,0 +1,11 @@
+{
+    "version": "1.0.0",
+    "name": "mom",
+    "description": "Matrix operations library.",
+    "keywords": [
+        "matrix",
+        "matrices"
+    ],
+    "homepage": "https://github.com/adagit94/mom",
+    "author": "Adam Pelc <adam.pelc94@gmail.com>"
+}
