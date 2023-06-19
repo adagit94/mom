@@ -1,5 +1,8 @@
 import { handleDiagonal } from "../internal/utils.js";
 
+type Slot<T> = { value: T; row: number; column: number; index: number };
+export type SlotTester<T> = (value: T, index: number, row: number, column: number) => any;
+
 export const getRow = <T = unknown>(index: number, columns: number, mat: T[]): T[] => {
     const firstColumn = index * columns;
 
@@ -26,13 +29,7 @@ export const getDiagonal = <T = unknown>(size: number, mat: T[], direction: "\\"
     return diagonal;
 };
 
-type Slot<T> = { value: T; row: number; column: number; index: number };
-
-export const getSlots = <T = unknown>(
-    columns: number,
-    mat: T[],
-    testFunc?: (slotVal: T, index: number, row: number, column: number) => any
-): Slot<T>[] => {
+export const findSlots = <T = unknown>(columns: number, mat: T[], slotTester?: SlotTester<T>): Slot<T>[] => {
     let slots: Slot<T>[] = [];
 
     for (let row = 0; ; row++) {
@@ -43,7 +40,7 @@ export const getSlots = <T = unknown>(
 
             const value = mat[index];
 
-            if (testFunc === undefined || testFunc(value, index, row, column)) slots.push({ index, value, column, row });
+            if (slotTester === undefined || slotTester(value, index, row, column)) slots.push({ index, value, column, row });
         }
     }
 };
