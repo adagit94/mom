@@ -26,3 +26,24 @@ export const getDiagonal = <T = unknown>(size: number, mat: T[], direction: "\\"
     return diagonal;
 };
 
+type Slot<T> = { value: T; row: number; column: number; index: number };
+
+export const getSlots = <T = unknown>(
+    columns: number,
+    mat: T[],
+    testFunc?: (slotVal: T, index: number, row: number, column: number) => any
+): Slot<T>[] => {
+    let slots: Slot<T>[] = [];
+
+    for (let row = 0; ; row++) {
+        for (let column = 0; column < columns; column++) {
+            const index = row * columns + column;
+
+            if (index === mat.length) return slots;
+
+            const value = mat[index];
+
+            if (testFunc === undefined || testFunc(value, index, row, column)) slots.push({ index, value, column, row });
+        }
+    }
+};
