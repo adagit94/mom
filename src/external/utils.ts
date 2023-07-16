@@ -40,7 +40,7 @@ export const findSlots = <T = unknown>(columns: number, mat: T[], slotTester?: S
 
             const value = mat[index];
 
-            if (slotTester === undefined || slotTester(value, index, row, column)) slots.push({ index, value, column, row });
+            if (slotTester === undefined || slotTester(value, index, row, column)) slots.push({ value, index, row, column });
         }
     }
 };
