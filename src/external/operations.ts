@@ -1,5 +1,6 @@
 import { Sorter, getSorter, handleDiagonal } from "../internal/utils.js";
-import { getColumn, getDiagonal, getRow } from "./utils.js";
+import { create } from "./patterns.js";
+import { getColumn, getDiagonal, getRow, isNumberMat } from "./utils.js";
 
 export const reverse = <T = unknown>(mat: T[]): T[] => {
     const slots = mat.length;
@@ -304,4 +305,31 @@ export const sortColumn = <T = unknown>(index: number, sorter: "asc" | "desc" | 
     if (typeof sorter === "string") sorter = getSorter<T>(sorter);
 
     return replaceColumn<T>(index, getColumn<T>(index, columns, mat).sort(sorter), columns, mat);
+};
+
+export type MultMat<T> = { mat: T[]; rows: number; columns: number };
+export const mult = <T extends number>(matA: MultMat<T>, matB: MultMat<T>): number[] => {
+    if (matA.columns !== matB.rows) {
+        throw new Error("Columns count of matA should be equal to matB rows count.");
+    }
+
+    let m: number[] = create(matA.rows, matB.columns);
+
+    for (let r = 0; r < matA.rows; r++) {
+        const i = r * matA.columns;
+        const row = matA.mat.slice(i, i + matA.columns);
+
+        for (let c = 0; c < matB.columns; c++) {
+            const col = getColumn<T>(c, matB.columns, matB.mat);
+            let sum = 0;
+
+            for (let i = 0; i < matA.columns; i++) {
+                sum += row[i] * col[i];
+            }
+
+            m[i + c] = sum;
+        }
+    }
+
+    return m;
 };

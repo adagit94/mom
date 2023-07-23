@@ -2,11 +2,13 @@ import { validateSquare } from "../../internal/helpers.js";
 import { Sorter } from "../../internal/utils.js";
 import { log } from "../helpers.js";
 import {
+    MultMat,
     addColumn,
     addRow,
     merge,
     mergeColumns,
     mergeRows,
+    mult,
     removeColumn,
     removeRow,
     replaceColumn,
@@ -27,7 +29,7 @@ import {
     swapRows,
 } from "../operations.js";
 import { SlotCreator, create } from "../patterns.js";
-import { SlotTester, findSlots, getColumn, getDiagonal, getRow } from "../utils.js";
+import { SlotTester, findSlots, getColumn, getDiagonal, getRow, isNumberMat } from "../utils.js";
 
 export default class Matrix<T = unknown> {
     private rows: number;
@@ -51,6 +53,8 @@ export default class Matrix<T = unknown> {
     public getColumn = (index: number) => structuredClone(getColumn<T>(index, this.columns, this.matrix));
     public getDiagonal = (direction: "\\" | "/" = "\\") =>
         structuredClone(validateSquare(this.rows, this.columns) && getDiagonal<T>(this.rows, this.matrix, direction));
+    public getRowsCount = () => this.rows;
+    public getColumnsCount = () => this.columns;
 
     public findSlots = (testFunc?: SlotTester<T>) => structuredClone(findSlots(this.columns, this.matrix, testFunc));
 
@@ -137,5 +141,17 @@ export default class Matrix<T = unknown> {
     };
     public sortColumn = (index: number, sorter: "asc" | "desc" | Sorter<T>) => {
         this.matrix = sortColumn(index, sorter, this.columns, this.matrix);
+    };
+
+    public mult = (mat: Matrix) => {
+        const m = mat.get();
+
+        if (!(isNumberMat(this.matrix) && isNumberMat(m))) throw new Error("Both matrices must be of number type.");
+
+        this.matrix = mult(
+            { mat: this.matrix, rows: this.rows, columns: this.columns },
+            { mat: m, rows: mat.getRowsCount(), columns: mat.getColumnsCount() }
+        ) as T[];
+        this.columns = mat.getColumnsCount();
     };
 }

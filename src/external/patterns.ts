@@ -1,11 +1,11 @@
 export type SlotCreator<T = unknown> = (r: number, c: number) => T;
 
-export const create = <T = unknown>(rows: number, columns: number, slotCreator: SlotCreator<T>): T[] => {
+export const create = <T = unknown>(rows: number, columns: number, slotCreator?: SlotCreator<T>): T[] => {
     let mat: T[] = [];
 
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < columns; c++) {
-            mat.push(slotCreator(r, c));
+            mat.push(slotCreator?.(r, c));
         }
     }
 

@@ -3,3 +3,4 @@
 .vscode/*
 /out
 test.html
+node_modules

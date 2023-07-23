@@ -44,3 +44,5 @@ export const findSlots = <T = unknown>(columns: number, mat: T[], slotTester?: S
         }
     }
 };
+
+export const isNumberMat = (mat: unknown[]): mat is number[] => mat.every(v => typeof v === "number");
