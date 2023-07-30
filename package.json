@@ -1,6 +1,6 @@
 {
-    "version": "1.1.0",
-    "name": "@adam94/mom",
+    "version": "1.0.0",
+    "name": "mom-ts",
     "description": "Matrix operations library.",
     "keywords": [
         "matrix",
