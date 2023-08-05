@@ -2,7 +2,6 @@ import { validateSquare } from "../../internal/helpers.js";
 import { Sorter } from "../../internal/utils.js";
 import { log } from "../helpers.js";
 import {
-    MultMat,
     addColumn,
     addRow,
     merge,
@@ -29,7 +28,7 @@ import {
     swapRows,
 } from "../operations.js";
 import { SlotCreator, create } from "../patterns.js";
-import { SlotTester, findSlots, getColumn, getDiagonal, getRow, isNumberMat } from "../utils.js";
+import { SlotTester, findSlots, getColumn, getDiagonal, getRow, getValue, isNumberMat, setValue } from "../utils.js";
 
 export default class Matrix<T = unknown> {
     private rows: number;
@@ -37,26 +36,43 @@ export default class Matrix<T = unknown> {
     private matrix: T[];
 
     constructor(rows: number, columns: number, input: T[] | SlotCreator<T>) {
+        const mat = Array.isArray(input) ? input : create(rows, columns, input);
+
+        if (mat.length !== rows * columns) {
+            throw new Error("Matrix array length should be equal to area of the matrix (rows * columns).");
+        }
+
+        this.set(mat);
         this.rows = rows;
         this.columns = columns;
-        this.set(Array.isArray(input) ? input : create(rows, columns, input));
     }
 
     private set = (mat: T[]) => {
-        this.matrix = structuredClone(mat);
+        this.matrix = [...mat];
     };
 
     public log = () => log<T>(this.columns, this.matrix);
 
-    public get = (): T[] => structuredClone(this.matrix);
-    public getRow = (index: number) => structuredClone(getRow<T>(index, this.columns, this.matrix));
-    public getColumn = (index: number) => structuredClone(getColumn<T>(index, this.columns, this.matrix));
+    public get = (): T[] => [...this.matrix];
+    public getValue = (row: number, column: number): T => {
+        let value = getValue<T>(row, column, this.columns, this.matrix);
+
+        if (typeof value === "object" && value !== null) {
+            value = (Array.isArray(value) ? [...value] : { ...value }) as T;
+        }
+
+        return value;
+    };
+    public getRow = (index: number) => getRow<T>(index, this.columns, this.matrix);
+    public getColumn = (index: number) => getColumn<T>(index, this.columns, this.matrix);
     public getDiagonal = (direction: "\\" | "/" = "\\") =>
-        structuredClone(validateSquare(this.rows, this.columns) && getDiagonal<T>(this.rows, this.matrix, direction));
+        validateSquare(this.rows, this.columns) && getDiagonal<T>(this.rows, this.matrix, direction);
     public getRowsCount = () => this.rows;
     public getColumnsCount = () => this.columns;
 
-    public findSlots = (testFunc?: SlotTester<T>) => structuredClone(findSlots(this.columns, this.matrix, testFunc));
+    public setValue = (value: T, row: number, column: number): void => setValue<T>(value, row, column, this.columns, this.matrix);
+
+    public findSlots = (testFunc?: SlotTester<T>) => findSlots(this.columns, this.matrix, testFunc);
 
     public reverse = () => {
         this.matrix = reverse<T>(this.matrix);
@@ -68,7 +84,9 @@ export default class Matrix<T = unknown> {
         this.matrix = reverseColumn<T>(index, this.columns, this.matrix);
     };
     public reverseDiagonal = (direction: "\\" | "/" = "\\") => {
-        this.matrix = validateSquare(this.rows, this.columns) && reverseDiagonal<T>(this.rows, this.matrix, direction);
+        if (validateSquare(this.rows, this.columns)) {
+            this.matrix = reverseDiagonal<T>(this.rows, this.matrix, direction);
+        }
     };
 
     public swap = () => {
@@ -81,7 +99,9 @@ export default class Matrix<T = unknown> {
         this.matrix = swapColumns<T>(a, b, this.columns, this.matrix);
     };
     public swapDiagonals = () => {
-        this.matrix = validateSquare(this.rows, this.columns) && swapDiagonals<T>(this.rows, this.matrix);
+        if (validateSquare(this.rows, this.columns)) {
+            this.matrix = swapDiagonals<T>(this.rows, this.matrix);
+        }
     };
 
     public addRow = (index: number, values: T[]) => {
@@ -109,11 +129,13 @@ export default class Matrix<T = unknown> {
         this.matrix = replaceColumn<T>(index, values, this.columns, this.matrix);
     };
     public replaceDiagonal = (newValues: T[], direction: "\\" | "/" = "\\") => {
-        this.matrix = validateSquare(this.rows, this.columns) && replaceDiagonal<T>(newValues, this.rows, this.matrix, direction);
+        if (validateSquare(this.rows, this.columns)) {
+            this.matrix = replaceDiagonal<T>(newValues, this.rows, this.matrix, direction);
+        }
     };
 
     public merge = (mat: T[], mergeHandler: (a: T, b: T) => T) => {
-        this.matrix = structuredClone(merge(this.matrix, mat, mergeHandler));
+        this.matrix = merge(this.matrix, mat, mergeHandler);
     };
     public mergeRows = (index: number, mergeHandler: (a: T, b: T) => T) => {
         this.matrix = mergeRows<T>(index, mergeHandler, this.columns, this.matrix);

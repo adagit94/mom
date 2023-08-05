@@ -1,7 +1,9 @@
 import { handleDiagonal } from "../internal/utils.js";
 
-type Slot<T> = { value: T; row: number; column: number; index: number };
+export type Slot<T> = { value: T; row: number; column: number; index: number };
 export type SlotTester<T> = (value: T, index: number, row: number, column: number) => any;
+
+export const getValue = <T = unknown>(row: number, column: number, columns: number, mat: T[]): T => mat[column + columns * row];
 
 export const getRow = <T = unknown>(index: number, columns: number, mat: T[]): T[] => {
     const firstColumn = index * columns;
@@ -12,7 +14,7 @@ export const getRow = <T = unknown>(index: number, columns: number, mat: T[]): T
 export const getColumn = <T = unknown>(index: number, columns: number, mat: T[]): T[] => {
     let col: T[] = [];
 
-    for (let s = index; mat[s] !== undefined; s += columns) {
+    for (let s = index; s < mat.length; s += columns) {
         col.push(mat[s]);
     }
 
@@ -27,6 +29,10 @@ export const getDiagonal = <T = unknown>(size: number, mat: T[], direction: "\\"
     });
 
     return diagonal;
+};
+
+export const setValue = <T = unknown>(value: T, row: number, column: number, columns: number, mat: T[]): void => {
+    mat[column + columns * row] = value;
 };
 
 export const findSlots = <T = unknown>(columns: number, mat: T[], slotTester?: SlotTester<T>): Slot<T>[] => {

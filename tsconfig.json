@@ -4,7 +4,8 @@
         "outDir": "./out",
         "target": "ES2022",
         "noImplicitAny": true,
-        "moduleResolution": "node"
+        "moduleResolution": "node",
+        "strictNullChecks": true
     },
     "watchOptions": {
         "watchFile": "useFsEvents",

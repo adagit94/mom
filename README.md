@@ -1,2 +1,2 @@
 # Mom
-Matrix operations library.
+Library for matrix operations and data routing.

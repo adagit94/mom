@@ -40,7 +40,7 @@ export const reverseColumn = <T = unknown>(column: number, columns: number, mat:
 
     let m: T[] = [...mat];
 
-    for (let s = column; mat[s] !== undefined; s += columns) {
+    for (let s = column; s < mat.length; s += columns) {
         indices.unshift(s);
         values.push(mat[s]);
     }
@@ -100,7 +100,7 @@ export const swapRows = <T = unknown>(a: number, b: number, columns: number, mat
 export const swapColumns = <T = unknown>(a: number, b: number, columns: number, mat: T[]): T[] => {
     let m: T[] = [...mat];
 
-    for (let aI = a, bI = b; mat[aI] !== undefined && mat[bI] !== undefined; aI += columns, bI += columns) {
+    for (let aI = a, bI = b; aI < mat.length && bI < mat.length; aI += columns, bI += columns) {
         m[aI] = mat[bI];
         m[bI] = mat[aI];
     }
@@ -154,7 +154,7 @@ export const removeRow = <T = unknown>(index: number, columns: number, mat: T[])
 export const removeColumn = <T = unknown>(index: number, columns: number, mat: T[]): T[] => {
     let m: T[] = [...mat];
 
-    for (let s = index; m[s] !== undefined; s += columns - 1) {
+    for (let s = index; s < mat.length; s += columns - 1) {
         m.splice(s, 1);
     }
 
@@ -313,7 +313,7 @@ export const mult = <T extends number>(matA: MultMat<T>, matB: MultMat<T>): numb
         throw new Error("Columns count of matA should be equal to matB rows count.");
     }
 
-    let m: number[] = create(matA.rows, matB.columns);
+    let m: number[] = create(matA.rows, matB.columns, () => 0);
 
     for (let r = 0; r < matA.rows; r++) {
         const i = r * matA.columns;

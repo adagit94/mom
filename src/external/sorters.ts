@@ -1,9 +1,9 @@
-type BiPolarOutputDestination = number[] | ((input: number) => void);
-type BiPolar = (inputs: number[], outputs: { positive: BiPolarOutputDestination; negative: BiPolarOutputDestination }, invert?: boolean) => void;
+export type BiPolarOutputDestination = number[] | ((input: number) => void);
+export type BiPolar = (inputs: number[], outputs: { positive: BiPolarOutputDestination; negative: BiPolarOutputDestination }, invert?: boolean) => void;
 
 export const biPolar: BiPolar = (inputs, outputDestinations, invert = false) => {
     for (const input of inputs) {
-        let outputDest: BiPolarOutputDestination;
+        let outputDest: BiPolarOutputDestination | undefined;
 
         if ((!invert && input > 0) || (invert && input < 0)) {
             outputDest = outputDestinations.positive;
