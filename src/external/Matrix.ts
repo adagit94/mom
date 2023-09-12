@@ -1,6 +1,6 @@
-import { validateSquare } from "../../internal/helpers.js";
-import { Sorter } from "../../internal/utils.js";
-import { log } from "../helpers.js";
+import { validateSquare } from "../internal/helpers.js";
+import { Sorter } from "../internal/utils.js";
+import { log } from "./helpers.js";
 import {
     addColumn,
     addRow,
@@ -26,9 +26,9 @@ import {
     swapColumns,
     swapDiagonals,
     swapRows,
-} from "../operations.js";
-import { SlotCreator, create } from "../patterns.js";
-import { SlotTester, findSlots, getColumn, getDiagonal, getRow, getValue, isNumberMat, setValue } from "../utils.js";
+} from "./operations.js";
+import { SlotCreator, create } from "./patterns.js";
+import { SlotTester, findSlots, getColumn, getDiagonal, getRow, getValue, isNumberMat, setValue } from "./utils.js";
 
 export default class Matrix<T = unknown> {
     private rows: number;

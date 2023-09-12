@@ -1,5 +1,5 @@
-import Matrix from "../Matrix/Matrix.js";
-import { Slot } from "../utils.js";
+import Matrix from "./Matrix.js";
+import { Slot } from "./utils.js";
 
 export type Message = { value: unknown };
 
