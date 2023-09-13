@@ -12,7 +12,7 @@
         "watchDirectory": "useFsEvents"
     },
     "typedocOptions": {
-        "out": "./doc",
+        "out": "./docs",
         "entryPoints": ["src/external/**/*"],
         "entryPointStrategy": "expand",
         "cleanOutputDir": true
