@@ -1,6 +1,6 @@
 import { Sorter, getSorter, handleDiagonal } from "../internal/utils.js";
 import { create } from "./patterns.js";
-import { getColumn, getDiagonal, getRow, isNumberMat } from "./utils.js";
+import { getColumn, getDiagonal, getRow, getValue, setValue } from "./utils.js";
 
 export const reverse = <T = unknown>(mat: T[]): T[] => {
     const slots = mat.length;
@@ -78,6 +78,18 @@ export const swap = <T = unknown>(columns: number, mat: T[]): T[] => {
 
         m.push(...column);
     }
+
+    return m;
+};
+
+export const swapValues = <T = unknown>(rowA: number, columnA: number, rowB: number, columnB: number, columns: number, mat: T[]): T[] => {
+    const a = getValue(rowA, columnA, columns, mat)
+    const b = getValue(rowB, columnB, columns, mat)
+    
+    let m: T[] = [...mat];
+
+    setValue(a, rowB, columnB, columns, m)
+    setValue(b, rowA, columnA, columns, m)
 
     return m;
 };

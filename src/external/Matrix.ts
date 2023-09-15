@@ -26,6 +26,7 @@ import {
     swapColumns,
     swapDiagonals,
     swapRows,
+    swapValues,
 } from "./operations.js";
 import { SlotCreator, create } from "./patterns.js";
 import { SlotTester, findSlots, getColumn, getDiagonal, getRow, getValue, isNumberMat, setValue } from "./utils.js";
@@ -91,6 +92,9 @@ export default class Matrix<T = unknown> {
 
     public swap = () => {
         this.matrix = swap<T>(this.columns, this.matrix);
+    };
+    public swapValues = (rowA: number, columnA: number, rowB: number, columnB: number) => {
+        this.matrix = swapValues<T>(rowA, columnA, rowB, columnB, this.columns, this.matrix);
     };
     public swapRows = (a: number, b: number) => {
         this.matrix = swapRows<T>(a, b, this.columns, this.matrix);

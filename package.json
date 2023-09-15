@@ -1,5 +1,5 @@
 {
-    "version": "1.3.0",
+    "version": "1.4.0",
     "name": "mom-ts",
     "description": "Library for matrix operations and data routing.",
     "keywords": [
