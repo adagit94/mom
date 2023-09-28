@@ -1,6 +1,6 @@
 import { Sorter, getSorter, handleDiagonal } from "../internal/utils.js";
 import { create } from "./patterns.js";
-import { getColumn, getDiagonal, getRow, getValue, setValue } from "./utils.js";
+import { convertByPerc } from "./utils.js";
 
 export const reverse = <T = unknown>(mat: T[]): T[] => {
     const slots = mat.length;
@@ -83,13 +83,13 @@ export const swap = <T = unknown>(columns: number, mat: T[]): T[] => {
 };
 
 export const swapValues = <T = unknown>(rowA: number, columnA: number, rowB: number, columnB: number, columns: number, mat: T[]): T[] => {
-    const a = getValue(rowA, columnA, columns, mat)
-    const b = getValue(rowB, columnB, columns, mat)
-    
+    const a = getValue(rowA, columnA, columns, mat);
+    const b = getValue(rowB, columnB, columns, mat);
+
     let m: T[] = [...mat];
 
-    setValue(a, rowB, columnB, columns, m)
-    setValue(b, rowA, columnA, columns, m)
+    setValue(a, rowB, columnB, columns, m);
+    setValue(b, rowA, columnA, columns, m);
 
     return m;
 };
@@ -135,6 +135,38 @@ export const swapDiagonals = <T = unknown>(size: number, mat: T[]): T[] => {
     });
 
     return m;
+};
+
+export const getValue = <T = unknown>(row: number, column: number, columns: number, mat: T[]): T => mat[column + columns * row];
+
+export const getRow = <T = unknown>(index: number, columns: number, mat: T[]): T[] => {
+    const firstColumn = index * columns;
+
+    return mat.slice(firstColumn, firstColumn + columns);
+};
+
+export const getColumn = <T = unknown>(index: number, columns: number, mat: T[]): T[] => {
+    let col: T[] = [];
+
+    for (let s = index; s < mat.length; s += columns) {
+        col.push(mat[s]);
+    }
+
+    return col;
+};
+
+export const getDiagonal = <T = unknown>(size: number, mat: T[], direction: "\\" | "/" = "\\"): T[] => {
+    let diagonal: T[] = [];
+
+    handleDiagonal(size, direction, s => {
+        diagonal.push(mat[s]);
+    });
+
+    return diagonal;
+};
+
+export const setValue = <T = unknown>(value: T, row: number, column: number, columns: number, mat: T[]): void => {
+    mat[columns * row + column] = value;
 };
 
 export const addRow = <T = unknown>(index: number, values: T[], columns: number, mat: T[]): T[] => {
@@ -344,4 +376,186 @@ export const mult = <T extends number>(matA: MultMat<T>, matB: MultMat<T>): numb
     }
 
     return m;
+};
+
+type Output<T> = {
+    mat: T[];
+    rows: number;
+    columns: number;
+};
+
+/**
+ * @param steps number of 90° steps - clockwise (positive number) or counter clockwise (negative number)
+ * @param rows number of rows
+ * @param columns number of columns
+ * @param mat matrix to transform
+ * @returns Object: { mat: T[], rows: number, columns: number }
+ */
+export const rotate = <T>(steps: number, rows: number, columns: number, mat: T[]): Output<T> => {
+    if (steps > 0) return rotateClockwise<T>(steps, rows, columns, mat);
+    if (steps < 0) return rotateCounterClockwise<T>(steps, rows, columns, mat);
+
+    return { mat, rows, columns };
+};
+
+const rotateClockwise = <T>(steps: number, rows: number, columns: number, mat: T[]): Output<T> => {
+    let m: T[] = new Array(mat.length);
+
+    for (let step = 0; step < steps; step++) {
+        for (let row = 0; row < rows; row++) {
+            const r = getRow(row, columns, mat);
+
+            m = replaceColumn(rows - row - 1, r, rows, m);
+        }
+
+        const rs = rows;
+        const cs = columns;
+
+        rows = cs;
+        columns = rs;
+        mat = m;
+        m = new Array(mat.length);
+    }
+
+    return { mat, rows, columns };
+};
+
+const rotateCounterClockwise = <T>(steps: number, rows: number, columns: number, mat: T[]): Output<T> => {
+    steps *= -1;
+
+    let m: T[] = new Array(mat.length);
+
+    for (let step = 0; step < steps; step++) {
+        for (let row = 0; row < rows; row++) {
+            const r = getRow(row, columns, mat).reverse();
+
+            m = replaceColumn(row, r, rows, m);
+        }
+
+        const rs = rows;
+        const cs = columns;
+
+        rows = cs;
+        columns = rs;
+        mat = m;
+        m = new Array(mat.length);
+    }
+
+    return { mat, rows, columns };
+};
+
+/**
+ * @description Positional - value will be positioned to same row and column as in source mat if slot at coordinates is available
+ * @description Proportional - value will be positioned to row and column based on its % distance in source mat on each axis (when multiple values at rounded coordinates pertain to same slot, closest will be choosed
+ * @description Clear - pure mat will be returned
+ */
+export enum ValuesTransfer {
+    Positional,
+    Proportional,
+    Clear,
+}
+
+type SlotValue<T> = { value: T; distance: number };
+type SlotValues<T> = { row: number; column: number; values: SlotValue<T>[] };
+
+export const scale = <T>(
+    rows: number,
+    rowsFactor: number,
+    columns: number,
+    columnsFactor: number,
+    mat: T[],
+    valuesTransfer: ValuesTransfer = ValuesTransfer.Positional
+): Output<T> => {
+    const rs = Math.round(rows * rowsFactor);
+    const cs = Math.round(columns * columnsFactor);
+
+    const area = rs * cs;
+
+    let m: T[] = new Array(area);
+
+    switch (valuesTransfer) {
+        case ValuesTransfer.Positional: {
+            const prevSlots = findSlots(columns, mat);
+
+            for (const slot of prevSlots) {
+                const { row, column, value } = slot;
+
+                if (row < rs && column < cs) {
+                    setValue(value, row, column, cs, m);
+                }
+            }
+
+            break;
+        }
+
+        case ValuesTransfer.Proportional: {
+            const prevSlots = findSlots(columns, mat, value => value !== undefined && value !== null);
+            let slotsValues: SlotValues<T>[] = [];
+
+            for (const slot of prevSlots) {
+                const { row, column, value } = slot;
+                const { row: newRow, column: newColumn } = convertByPerc({ rows, columns, row, column }, { rows: rs, columns: cs });
+                const roundedNewRow = Math.round(newRow);
+                const roundedNewColumn = Math.round(newColumn);
+
+                let slotValues = slotsValues.find(v => v.row === roundedNewRow && v.column === roundedNewColumn);
+                const slotValue = {
+                    value,
+                    distance: Math.abs(newRow - roundedNewRow) + Math.abs(newColumn - roundedNewColumn),
+                };
+
+                if (slotValues) {
+                    slotValues.values.push(slotValue);
+                } else {
+                    slotsValues.push({
+                        row: roundedNewRow,
+                        column: roundedNewColumn,
+                        values: [slotValue],
+                    });
+                }
+            }
+
+            for (const slotValues of slotsValues) {
+                let closestSlotValue: SlotValue<T> | undefined;
+
+                for (const slotValue of slotValues.values) {
+                    if (closestSlotValue === undefined || slotValue.distance < closestSlotValue.distance) {
+                        closestSlotValue = slotValue;
+                    }
+                }
+
+                setValue(closestSlotValue?.value, slotValues.row, slotValues.column, cs, m);
+            }
+
+            break;
+        }
+    }
+
+    return { mat: m, rows: rs, columns: cs };
+};
+
+export type Slot<T> = { value: T; row: number; column: number; index: number };
+export type SlotTester<T> = (value: T, index: number, row: number, column: number) => any;
+
+export const findSlots = <T = unknown>(columns: number, mat: T[], slotTester?: SlotTester<T>): Slot<T>[] => {
+    let slots: Slot<T>[] = [];
+
+    for (let row = 0; ; row++) {
+        for (let column = 0; column < columns; column++) {
+            const index = row * columns + column;
+
+            if (index === mat.length) return slots;
+
+            const value = mat[index];
+
+            if (slotTester === undefined || slotTester(value, index, row, column)) slots.push({ value, index, row, column });
+        }
+    }
+};
+
+export const clip = <T = unknown>(rowFrom: number, rowTo: number, columnFrom: number, columnTo: number, columns: number, mat: T[]): Output<T> => {
+    const slots = findSlots(columns, mat, (_v, _i, r, c) => r >= rowFrom && r <= rowTo && c >= columnFrom && c <= columnTo);
+    const m = slots.map(({ value }) => value);
+
+    return { mat: m, rows: rowTo - rowFrom + 1, columns: columnTo - columnFrom + 1 };
 };

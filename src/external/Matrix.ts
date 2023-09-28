@@ -2,8 +2,16 @@ import { validateSquare } from "../internal/helpers.js";
 import { Sorter } from "../internal/utils.js";
 import { log } from "./helpers.js";
 import {
+    SlotTester,
+    ValuesTransfer,
     addColumn,
     addRow,
+    clip,
+    findSlots,
+    getColumn,
+    getDiagonal,
+    getRow,
+    getValue,
     merge,
     mergeColumns,
     mergeRows,
@@ -17,6 +25,9 @@ import {
     reverseColumn,
     reverseDiagonal,
     reverseRow,
+    rotate,
+    scale,
+    setValue,
     sort,
     sortColumn,
     sortRow,
@@ -29,7 +40,7 @@ import {
     swapValues,
 } from "./operations.js";
 import { SlotCreator, create } from "./patterns.js";
-import { SlotTester, findSlots, getColumn, getDiagonal, getRow, getValue, isNumberMat, setValue } from "./utils.js";
+import { isNumberMat } from "./utils.js";
 
 export default class Matrix<T = unknown> {
     private rows: number;
@@ -43,14 +54,8 @@ export default class Matrix<T = unknown> {
             throw new Error("Matrix array length should be equal to area of the matrix (rows * columns).");
         }
 
-        this.set(mat);
-        this.rows = rows;
-        this.columns = columns;
+        this.set(rows, columns, mat);
     }
-
-    private set = (mat: T[]) => {
-        this.matrix = [...mat];
-    };
 
     public log = () => log<T>(this.columns, this.matrix);
 
@@ -71,6 +76,11 @@ export default class Matrix<T = unknown> {
     public getRowsCount = () => this.rows;
     public getColumnsCount = () => this.columns;
 
+    public set = (rows: number, columns: number, mat: T[]) => {
+        this.matrix = [...mat];
+        this.rows = rows;
+        this.columns = columns;
+    };
     public setValue = (value: T, row: number, column: number): void => setValue<T>(value, row, column, this.columns, this.matrix);
 
     public findSlots = (testFunc?: SlotTester<T>) => findSlots(this.columns, this.matrix, testFunc);
@@ -180,4 +190,31 @@ export default class Matrix<T = unknown> {
         ) as T[];
         this.columns = mat.getColumnsCount();
     };
+
+    /**
+     * @param steps number of 90° steps - clockwise (positive number) or counter clockwise (negative number)
+     */
+    public rotate = (steps: number) => {
+        const { mat, rows, columns } = rotate<T>(steps, this.rows, this.columns, this.matrix);
+
+        this.matrix = mat;
+        this.rows = rows;
+        this.columns = columns;
+    };
+
+    public scale = (rowsFactor: number, columnsFactor: number, valuesTransfer: ValuesTransfer = ValuesTransfer.Positional) => {
+        const { mat, rows, columns } = scale<T>(this.rows, rowsFactor, this.columns, columnsFactor, this.matrix, valuesTransfer);
+
+        this.matrix = mat;
+        this.rows = rows;
+        this.columns = columns;
+    };
+
+    public clip = (rowFrom: number, rowTo: number, columnFrom: number, columnTo: number) => {
+        const { mat, rows, columns } = clip<T>(rowFrom, rowTo, columnFrom, columnTo, this.columns, this.matrix);
+
+        this.matrix = mat;
+        this.rows = rows;
+        this.columns = columns;
+    }
 }
