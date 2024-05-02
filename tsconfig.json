@@ -13,7 +13,7 @@
     },
     "typedocOptions": {
         "out": "./docs",
-        "entryPoints": ["src/external/**/*"],
+        "entryPoints": ["src/**/*"],
         "entryPointStrategy": "expand",
         "cleanOutputDir": true
     }

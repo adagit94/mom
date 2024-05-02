@@ -1,17 +1,25 @@
 {
-    "version": "1.4.0",
+    "version": "1.5.0",
     "name": "mom-ts",
     "description": "Library for matrix operations and data routing.",
     "keywords": [
         "matrix",
         "matrices"
     ],
-    "homepage": "https://github.com/adagit94/mom",
     "author": "Adam Pelc <adam.pelc94@gmail.com>",
+    "license": "ISC",
+    "homepage": "https://github.com/adagit94/mom",
+    "bugs": {
+        "url": "https://github.com/adagit94/mom/issues"
+    },
     "scripts": {
+        "test": "jest",
         "doc": "typedoc"
     },
     "devDependencies": {
+        "@jest/globals": "^29.7.0",
+        "ts-jest": "^29.1.2",
+        "ts-node": "^10.9.2",
         "typedoc": "^0.25.1",
         "typescript": "^5.1.6"
     }
